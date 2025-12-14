@@ -11,7 +11,7 @@ __________
 This project aims at building a pipeline framework environment to test strategies to generate consistent, risk-controlled returns in all conditions of financial markets. The goal is to identify **short-term high-frequency alpha** by leveraging quantitative methods for disciplined portfolio management.
 
 The system integrates three distinct modules:
-1.  **Sentiment Indicator:** Scraping and classifying text from financial subreddits (r/WallStreetBets, r/stocks).
+1.  **Sentiment Indicator:** Scraping and classifying text from financial subreddits (r/WallStreetBets, r/stocks, other defined subreddits).
 2.  **ML Clustering of Market Regimes:** Using K-means clustering to determine if we are in a Bull, Bear, or Neutral market.
 3.  **Technical Screener:** High-speed filtering of tickers based on technical conditions.
 
@@ -19,31 +19,31 @@ __________
 
 ## 2. Data Sources and Acquisition
 The pipeline pulls data from a mix of sources to build a complete picture of the market:
-* **Reddit API (PRAW):** For extracting raw text from retail traders.
+* **Reddit HTML & API:** For extracting raw text from retail traders.
 * **Yahoo Finance (yfinance):** For OHLCV (Open, High, Low, Close, Volume) market data.
-* **CBOE Weeklys:** utilized a static list of ~660 tickers that have weekly options available (high liquidity).
+* **CBOE Weeklys:** utilized a updated HTML list of ~660 tickers that have at least weekly options.
 __________
 
 ## 3. Pipeline Modules
 
 ### A. Sentiment Analysis (The "Vibe Check")
-I utilized **VADER (Valence Aware Dictionary and sEntiment Reasoner)** because it is specifically tuned for social media text. It handles caps, slang, and emojis better than standard NLP models.
-* **Goal:** Turn qualitative "noise" into a quantitative score.
-* **Output:** A compound sentiment score that acts as a pre-filter for the universe of stocks.
+I utilized **VADER (Valence Aware Dictionary and sEntiment Reasoner)** due to its specialized social media sentiment text generation. 
+**Goal:** Turn qualitative content into a quantitative sentiment score.
+* **Output:** A compound sentiment score that acts as a pre-filter for the CBOE Weekly universe of tickers.
 
 ### B. Clustering Market Regimes (The "Weather Report")
 Most algorithms fail because they don't know *when* to stop trading. I used **Unsupervised Learning (K-Means Clustering)** on historical SPY data (Volatility, Returns, Momentum) to categorize market days.
-* **Regime 0:** Low Volatility / Bullish (Safe to trade)
-* **Regime 1:** High Volatility / Bearish (Risk off)
-* **Regime 2:** Choppy / Neutral (Caution)
+* **Regime 0:** Bull: All is well. 
+* **Regime 1:** Bear: Fight against current.
+* **Regime 2:** Neutral: Transitionary period.
 
 ### C. Technical Screener
-I used `pandas-ta` to calculate indicators like RSI, Bollinger Bands, and MACD. This step filters the 600+ ticker universe down to just the few that match the current regime's criteria.
+I used `pandas-ta` to calculate various technical indicators. This step enriches the 600+ ticker universe down as defined in filters.
 __________
 
 ## 4. Strategy Backtesting
 
-I used **VectorBT** for the backtesting engine. Standard Python loops are too slow for testing thousands of parameter combinations. VectorBT allowed me to simulate:
+I used **VectorBT** for the backtesting engine. The test strategy performed poorly, but prooved the platform frameowrk work for:
 * Entry/Exit logic based on the Hybrid signals.
 * Transaction fees and Slippage.
 * Portfolio performance vs. Benchmark (SPY).
@@ -51,21 +51,21 @@ __________
 
 ## 5. Challenges and Limitations
 
-This wasn't a straight line to success. I hit several major roadblocks:
-* **Options Data Dimensionality:** Options chains (Strike x Expiry x Greeks) create massive datasets. I had to use the underlying stock price as a proxy for the options strategy to keep the project manageable.
-* **The "Reddit API Apocalypse":** Reddit tightened their API access, which made fetching deep historical sentiment data difficult for a solo developer.
-* **Lagging Indicators:** The K-Means clusters accurately described *past* volatility, but sometimes lagged in predicting *future* shifts (reactive vs. proactive).
+The project evolved a lot over the course. But some of the most considerable challenges were:
+* **Options Data Dimensionality:** Options chains (Strike + Expiry) can create **very** massive datasets, especially over large historic periods. 
+* **Reddit API:** Reddit tightened their API access in late November, moving it from relatively public access to private and webform request approval/approved access only, which made fetching a large historical data set difficult.
+* **Lagging Indicators:** The K-Means clusters accurately described volatility, but it seems to move rapidly between regimes in volatile periods. It might not be useful in volatile and transitionary environments. 
 
 __________
 
 ## 6. Future Roadmap
 
-If I continue this project, the workflow would evolve into this:
-1.  **Parquet Storage:** Move away from CSVs to effectively store numerous options chains.
-2.  **Unified Backtesting Framework:** Create a modular, reusable framework that integrates defined risk management parameters.
+1. **Remove unproductive modules**: Remove reddit scrapping and other non-productive modules. Hopefully replace with enriched data feeds for more efficiency.
+2. **Test numerous backtesting libraries/engines**: Test for usability, ease, adaptability and options integration.
+3. **Optimize backtesting results**: Produce better backtesting results, highlighting performance in difference market regimes.
 3.  **Generate Production-Ready Scripts:**
     * Once a strategy is validated, the framework will auto-export a clean `.py` file.
-    * This script will push orders (Entry, Target, Stoploss) directly to the **IBKR Brokerage API**.
+    * This script will have option to push orders (Entry, Target, Stoploss) directly to defined brokerage APIs.
 __________
 
 ## References: 
