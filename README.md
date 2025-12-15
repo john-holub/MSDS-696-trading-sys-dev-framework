@@ -1,7 +1,7 @@
 # Development of a Multi-Module Trading Strategy Pipeline & Platform Framework
 
 **Course:** MSDS-696 - Data Science Practicum II - Regis University  
-**Author:** John Holub
+**Author:** John Holub  
 **Last Updated:** December 14, 2025 
 
 __________
