@@ -26,7 +26,8 @@ __________
 
 ## 3. Pipeline Modules
 
-### A. Sentiment Analysis (The "Vibe Check")
+### A. Sentiment Analysis
+
 I utilized **VADER (Valence Aware Dictionary and sEntiment Reasoner)** due to its specialized social media sentiment text generation. 
 **Goal:** Turn qualitative content into a quantitative sentiment score.
 * **Output:** A compound sentiment score that acts as a pre-filter for the CBOE Weekly universe of tickers.
